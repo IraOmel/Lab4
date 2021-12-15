@@ -1,0 +1,18 @@
+{
+  "Java": {
+    "_title": "Java",
+    "_teacher": "Ira Omel",
+    "_list_of_topics": [
+      "Classes",
+      "Swing"
+    ]
+  },
+  "Math": {
+    "_title": "Math",
+    "_teacher": "Ira Mal",
+    "_list_of_topics": [
+      "Classes",
+      "Swing"
+    ]
+  }
+}

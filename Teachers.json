@@ -1,0 +1,16 @@
+{
+  "Ira Omel": {
+    "_name": "Ira Omel",
+    "_name_course": [
+      "Java"
+    ]
+  },
+  "Ira Mal": {
+    "_name": "Ira Mal",
+    "_name_course": [
+      "English",
+      "Python",
+      "Math"
+    ]
+  }
+}
