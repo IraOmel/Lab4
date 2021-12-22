@@ -11,14 +11,12 @@ class Rational:
             raise TypeError("incorrect type")
         if isinstance(other, int):
             result_numerator = self.numerator + self.denominator * other
-            result = f'{result_numerator // math.gcd(result_numerator, self.denominator)} / ' \
-                     f'{self.denominator // math.gcd(result_numerator, self.denominator)}'
+            result = Rational(result_numerator, self.denominator)
 
         result_numerator = self.numerator * other.denominator + self.denominator * other.numerator
         result_denominator = self.denominator * other.denominator
-        result = f'{result_numerator // math.gcd(result_numerator, result_denominator)} / ' \
-                 f'{result_denominator // math.gcd(result_numerator, result_denominator)}'
-        return result
+        return Rational(result_numerator, result_denominator)
+
 
     def __iadd__(self, other):
         if not isinstance(other, (int, Rational)):
@@ -38,9 +36,7 @@ class Rational:
             other = Rational(other)
         result_numerator = self.numerator * other.denominator - self.denominator * other.numerator
         result_denominator = self.denominator * other.denominator
-
-        return f'{result_numerator // math.gcd(result_numerator, result_denominator)} / ' \
-               f'{result_denominator // math.gcd(result_numerator, result_denominator)}'
+        return Rational(result_numerator, result_denominator)
 
     def __isub__(self, other):
         if not isinstance(other, (int, Rational)):
@@ -60,9 +56,7 @@ class Rational:
             other = Rational(other)
         result_numerator = self.numerator * other.numerator
         result_denominator = self.denominator * other.denominator
-
-        return f'{result_numerator // math.gcd(result_numerator, result_denominator)} / ' \
-               f'{result_denominator // math.gcd(result_numerator, result_denominator)}'
+        return Rational(result_numerator, result_denominator)
 
     def __imul__(self, other):
         if not isinstance(other, (int, Rational)):
@@ -83,8 +77,7 @@ class Rational:
         result_numerator = self.numerator * other.denominator
         result_denominator = self.denominator * other.numerator
 
-        return f'{result_numerator // math.gcd(result_numerator, result_denominator)} / ' \
-               f'{result_denominator // math.gcd(result_numerator, result_denominator)}'
+        return Rational(result_numerator, result_denominator)
 
     def __itruediv__(self, other):
         if not isinstance(other, (int, Rational)):
@@ -120,7 +113,7 @@ class Rational:
             other = Rational(other)
         return self.numerator * other.denominator > self.denominator * other.numerator
 
-    def operation(self):
+    def __str__(self):
         """Return a reduced fraction"""
         return f'{self.__numerator}/{self.__denominator}'
 
@@ -149,22 +142,22 @@ class Rational:
 
 obj1 = Rational(1, 5)
 obj2 = Rational(3, 5)
-print("Add: " + obj1.operation() + ' + ' + obj2.operation() + " = " + (obj1 + obj2))
-print("Add: " + (obj1 + 5))
+print(obj1 + obj2)
+print(obj1 + 5)
 obj1 += obj2
-print(obj1.operation())
-print("\nSubtract: " + obj1.operation() + ' - ' + obj2.operation() + " = " + (obj1 - obj2))
-print("Subtract: " + (obj1 - 5))
+print(obj1)
+print(obj1 - obj2)
+print(obj1 - 5)
 obj1 -= 3
-print(obj1.operation())
-print("\nMultiply: " + obj1.operation() + ' * ' + obj2.operation() + " = " + (obj1 * obj2))
-print("Multiply: " + (obj2 * 5))
+print(obj1)
+print(obj1 * obj2)
+print(obj2 * 5)
 obj1 *= 3
-print(obj1.operation())
-print("\nDivide: " + obj1.operation() + ' / ' + obj2.operation() + " = " + (obj1 / obj2))
-print("Divide: " + (obj2 / 5))
+print(obj1)
+print(obj1 / obj2)
+print(obj2 / 5)
 obj1 /= obj2
-print(obj1.operation())
+print(obj1)
 print(obj1 == obj2)
 print(obj1 < obj2)
 print(obj1 > obj2)

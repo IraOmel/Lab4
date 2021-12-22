@@ -1,6 +1,6 @@
 import json
-from interfaces import ICourse, ILocalCourse, IOffsiteCourse, ITeacher, ICourseFactory
-import schema_json
+from Task3.interfaces import ICourse, ILocalCourse, IOffsiteCourse, ITeacher, ICourseFactory
+from Task3 import schema_json
 
 
 class Course(ICourse):
