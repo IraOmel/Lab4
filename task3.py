@@ -1,13 +1,6 @@
 import json
-from abc import ABC, abstractmethod
-
-
-class ICourse(ABC):
-    """Interface for Course """
-
-    @abstractmethod
-    def __init__(self, title, teacher, list_of_topics):
-        pass
+from interfaces import ICourse, ILocalCourse, IOffsiteCourse, ITeacher, ICourseFactory
+import schema_json
 
 
 class Course(ICourse):
@@ -19,7 +12,7 @@ class Course(ICourse):
         self.list_of_topics = list_of_topics
 
     @property
-    def title(self):
+    def title(self) -> str:
         return self._title
 
     @title.setter
@@ -33,7 +26,7 @@ class Course(ICourse):
         self._title = title
 
     @property
-    def teacher(self):
+    def teacher(self) -> str:
         return self._teacher
 
     @teacher.setter
@@ -45,7 +38,7 @@ class Course(ICourse):
         self._teacher = teacher
 
     @property
-    def list_of_topics(self):
+    def list_of_topics(self) -> list:
         return self._list_of_topics
 
     @list_of_topics.setter
@@ -55,18 +48,6 @@ class Course(ICourse):
         if not list_of_topics:
             raise ValueError("string is empty")
         self._list_of_topics = list_of_topics
-
-
-class ILocalCourse(ABC):
-    """Interface for ILocalCourse """
-
-    @abstractmethod
-    def __init__(self, title, teacher, list_of_topics):
-        pass
-
-    @abstractmethod
-    def __str__(self):
-        pass
 
 
 class LocalCourse(Course, ILocalCourse):
@@ -79,18 +60,6 @@ class LocalCourse(Course, ILocalCourse):
         return f' Local course: {self.title} teacher: {self.teacher}, topics: {self.list_of_topics}'
 
 
-class IOffsiteCourse(ABC):
-    """Interface for IOffsiteCourse """
-
-    @abstractmethod
-    def __init__(self, title, teacher, list_of_topics):
-        pass
-
-    @abstractmethod
-    def __str__(self):
-        pass
-
-
 class OffsiteCourse(Course, IOffsiteCourse):
     """Class for get information about Offsite course """
 
@@ -101,25 +70,13 @@ class OffsiteCourse(Course, IOffsiteCourse):
         return f' Offsite course: {self.title} teacher: {self.teacher}, topics: {self.list_of_topics}'
 
 
-class ITeacher(ABC):
-    """Interface for Teacher """
-
-    @abstractmethod
-    def __init__(self, name, name_course=None):
-        pass
-
-    @abstractmethod
-    def __str__(self):
-        pass
-
-
 class Teacher(ITeacher):
     def __init__(self, name, name_course=None):
         self.name = name
         self.name_course = name_course
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
@@ -131,7 +88,7 @@ class Teacher(ITeacher):
         self._name = name
 
     @property
-    def name_course(self):
+    def name_course(self) -> list:
         return self._name_course
 
     @name_course.setter
@@ -146,26 +103,6 @@ class Teacher(ITeacher):
         return f' {self.name}: course - {self.name_course}'
 
 
-class ICourseFactory(ABC):
-    """Interface for ICourseFactory """
-
-    @abstractmethod
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def add_teacher(self, name, course=None):
-        pass
-
-    @abstractmethod
-    def add_course(self, title, teacher, list_of_topics, type_course):
-        pass
-
-    @abstractmethod
-    def del_teacher(self, name, title):
-        pass
-
-
 class CourseFactory(ICourseFactory):
     """Factory for create teacher and Local/Offsite course """
 
@@ -173,30 +110,38 @@ class CourseFactory(ICourseFactory):
         self.courses = {}
         self.teachers = {}
 
-    def add_teacher(self, name, courses=None):
+    def add_teacher(self, name, courses=None) -> Teacher:
         if courses is None:
             courses = []
         self.teachers = json.load(open("Teachers.json"))
+        if not schema_json.validate_json_teacher(self.teachers[name]):
+            raise ValueError("incorrect data")
         with open('Teachers.json', 'w') as file:
             self.teachers.update({name: Teacher(name, courses).__dict__})
             json.dump(self.teachers, file, indent=2)
         return Teacher(name, courses)
 
-    def add_course(self, title, teacher, list_of_topics, type_course):
+    def add_course(self, title, teacher, list_of_topics, type_course) -> Course:
         dict_of_courses = {"Local": LocalCourse(title, teacher.name, list_of_topics),
                            "Offsite": OffsiteCourse(title, teacher.name, list_of_topics)}
         if title not in teacher.name_course:
             teacher.name_course.append(title)
         self.add_teacher(teacher.name, teacher.name_course)
         self.courses = json.load(open("Courses.json"))
+        if not schema_json.validate_json_course(self.courses[title]):
+            raise ValueError("incorrect data in course json")
         with open('Courses.json', 'w') as file:
             self.courses.update({title: dict_of_courses[type_course].__dict__})
             json.dump(self.courses, file, indent=2)
         return dict_of_courses[type_course]
 
-    def del_teacher(self, name, title):
+    def del_teacher(self, name, title) -> dict:
         with open("Teachers.json", 'r') as file:
             self.teachers = json.load(open("Teachers.json"))
+        if not schema_json.validate_json_teacher(self.teachers[name]):
+            raise ValueError("incorrect data in teacher json")
+        if not schema_json.validate_json_course(self.courses[title]):
+            raise ValueError("incorrect data in course json")
         if name in self.teachers.keys():
             del self.teachers[name]
             self.courses[title]["teacher"] = ""
@@ -207,17 +152,17 @@ class CourseFactory(ICourseFactory):
         return self.teachers
 
 
-create_course = CourseFactory()
-teacher_1 = create_course.add_teacher("Ira Omel")
-course_1 = create_course.add_course("Java", teacher_1, ["Classes", "Swing"], "Local")
-teacher_2 = create_course.add_teacher("Ira Mal", ["English", "Python"])
-course_2 = create_course.add_course("Math", teacher_2, ["Classes", "Swing"], "Offsite")
-# print(course_1)
-# print(course_2)
-# print(teacher_1)
-# print(teacher_2)
-# create_course.del_teacher
-print("Teachers:")
-print('\n'.join("{}: \n{}".format(key, value) for key, value in create_course.teachers.items()))
-print("\nCourses:")
-print('\n'.join("{}: \n{}".format(key, value) for key, value in create_course.courses.items()))
+if __name__ == "__main__":
+    create_course = CourseFactory()
+    teacher_1 = create_course.add_teacher("Ira Omel")
+    course_1 = create_course.add_course("Java", teacher_1, ["Classes", "Swing"], "Local")
+    teacher_2 = create_course.add_teacher("Ira Mal", ["English", "Python"])
+    course_2 = create_course.add_course("Math", teacher_2, ["Polygon", "Rational"], "Offsite")
+    print("Teachers:")
+    print('\n'.join("{}: \n{}".format(key, value) for key, value in create_course.teachers.items()))
+    print("\nCourses:")
+    print('\n'.join("{}: \n{}".format(key, value) for key, value in create_course.courses.items()))
+
+    # with open("Teachers.json", 'r') as file:
+    #     teachers = json.load(open("Teachers.json"))
+    # print(schema_json.check_json(teachers["Ira Omel"]))
