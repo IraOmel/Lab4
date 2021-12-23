@@ -6,17 +6,19 @@ from Task3 import schema_json
 class Course(ICourse):
     """ Class for set information for courses """
 
-    def __init__(self, title, teacher, list_of_topics):
+    def __init__(self, title: str, teacher: str, list_of_topics: list):
         self.title = title
         self.teacher = teacher
         self.list_of_topics = list_of_topics
 
     @property
     def title(self) -> str:
+        """Get the name of course."""
         return self._title
 
     @title.setter
-    def title(self, title):
+    def title(self, title: str):
+        """Set the name of course."""
         if not isinstance(title, str):
             raise TypeError("incorrect type")
         if not all(letter.isalpha() for letter in title):
@@ -27,10 +29,12 @@ class Course(ICourse):
 
     @property
     def teacher(self) -> str:
+        """Get the teacher of course."""
         return self._teacher
 
     @teacher.setter
-    def teacher(self, teacher):
+    def teacher(self, teacher: str):
+        """Set the teacher of course."""
         if not isinstance(teacher, str):
             raise TypeError("incorrect type")
         if not teacher:
@@ -42,7 +46,7 @@ class Course(ICourse):
         return self._list_of_topics
 
     @list_of_topics.setter
-    def list_of_topics(self, list_of_topics):
+    def list_of_topics(self, list_of_topics: list):
         if not all([isinstance(topic, str) for topic in list_of_topics]):
             raise TypeError("Incorrect type")
         if not list_of_topics:
@@ -53,7 +57,7 @@ class Course(ICourse):
 class LocalCourse(Course, ILocalCourse):
     """Class for get information about Local course """
 
-    def __init__(self, title, teacher, list_of_topics):
+    def __init__(self, title: str, teacher: str, list_of_topics: list):
         super().__init__(title, teacher, list_of_topics)
 
     def __str__(self):
@@ -63,7 +67,7 @@ class LocalCourse(Course, ILocalCourse):
 class OffsiteCourse(Course, IOffsiteCourse):
     """Class for get information about Offsite course """
 
-    def __init__(self, title, teacher, list_of_topics):
+    def __init__(self, title: str, teacher: str, list_of_topics: list):
         super().__init__(title, teacher, list_of_topics)
 
     def __str__(self):
@@ -71,16 +75,18 @@ class OffsiteCourse(Course, IOffsiteCourse):
 
 
 class Teacher(ITeacher):
-    def __init__(self, name, name_course=None):
+    def __init__(self, name: str, name_course=None):
         self.name = name
         self.name_course = name_course
 
     @property
     def name(self) -> str:
+        """Get the teacher's name of course."""
         return self._name
 
     @name.setter
-    def name(self, name):
+    def name(self, name: str):
+        """Set the teacher's name of course."""
         if not isinstance(name, str):
             raise TypeError("incorrect type")
         if not name:
@@ -89,10 +95,11 @@ class Teacher(ITeacher):
 
     @property
     def name_course(self) -> list:
+        """Get the list of course."""
         return self._name_course
 
     @name_course.setter
-    def name_course(self, name_course):
+    def name_course(self, name_course: list):
         if not all([isinstance(course, str) for course in name_course]):
             raise TypeError("Incorrect type")
         if name_course is None:
@@ -110,7 +117,8 @@ class CourseFactory(ICourseFactory):
         self.courses = {}
         self.teachers = {}
 
-    def add_teacher(self, name, courses=None) -> Teacher:
+    def add_teacher(self, name: str, courses=None) -> Teacher:
+        """Return object of Teacher class. Create teacher and write it to json . """
         if courses is None:
             courses = []
         self.teachers = json.load(open("Teachers.json"))
@@ -121,7 +129,8 @@ class CourseFactory(ICourseFactory):
             json.dump(self.teachers, file, indent=2)
         return Teacher(name, courses)
 
-    def add_course(self, title, teacher, list_of_topics, type_course) -> Course:
+    def add_course(self, title: str, teacher: Teacher, list_of_topics: list, type_course: str) -> Course:
+        """Return object of Course class. Create course and write it to json ."""
         dict_of_courses = {"Local": LocalCourse(title, teacher.name, list_of_topics),
                            "Offsite": OffsiteCourse(title, teacher.name, list_of_topics)}
         if title not in teacher.name_course:
@@ -135,7 +144,8 @@ class CourseFactory(ICourseFactory):
             json.dump(self.courses, file, indent=2)
         return dict_of_courses[type_course]
 
-    def del_teacher(self, name, title) -> dict:
+    def del_teacher(self, name: str, title: str) -> dict:
+        """Return update dictionary of teachers. Delete teacher from course."""
         with open("Teachers.json", 'r') as file:
             self.teachers = json.load(open("Teachers.json"))
         if not schema_json.validate_json_teacher(self.teachers[name]):
